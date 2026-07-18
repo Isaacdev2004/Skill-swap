@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import logoPath from "@assets/skillswaplogo_1784374390885.png";
 import { useAuthStore } from "@/store/authStore";
+import { cn } from "@/lib/utils";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -18,23 +19,64 @@ export default function Register() {
 
   return (
     <div className="flex min-h-screen w-full">
-      {/* Left panel - form */}
-      <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-background">
-        <div className="lg:hidden mb-12">
+      {/* Left panel — brand */}
+      <div className="hidden lg:flex w-[420px] flex-col justify-between px-12 py-12 bg-[#1e1b4b] text-white relative overflow-hidden flex-shrink-0">
+        {/* background circles */}
+        <div className="absolute -top-20 -left-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -right-10 w-64 h-64 bg-secondary/20 rounded-full blur-3xl" />
+
+        <Link href="/" className="relative z-10 flex items-center gap-2 w-max">
+          <img src={logoPath} alt="SkillSwap" className="h-8 w-8 brightness-0 invert" />
+          <span className="font-bold text-lg tracking-tight">SkillSwap</span>
+        </Link>
+
+        <div className="relative z-10 space-y-6">
+          <h2 className="text-4xl font-bold leading-tight">
+            Learn anything.<br />Teach anything.
+          </h2>
+          <p className="text-white/70 text-base leading-relaxed">
+            Exchange skills, build connections. Grow together.
+          </p>
+
+          {/* Floating skill cards */}
+          {[
+            { initials: "SJ", color: "bg-purple-500", teaches: "Guitar", wants: "Python" },
+            { initials: "AS", color: "bg-indigo-500", teaches: "Python", wants: "Guitar" },
+          ].map((c, i) => (
+            <div key={i} className={cn("bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10", i === 1 && "ml-6")}>
+              <div className="flex items-center gap-3">
+                <div className={cn("w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm", c.color)}>
+                  {c.initials}
+                </div>
+                <div className="text-sm">
+                  <div className="text-white/60">Teaches <span className="text-white font-medium">{c.teaches}</span></div>
+                  <div className="text-white/60">Wants <span className="text-emerald-400 font-medium">{c.wants}</span></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p className="relative z-10 text-xs text-white/40">© 2024 SkillSwap. All rights reserved.</p>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex-1 flex flex-col justify-center px-8 sm:px-14 lg:px-20 bg-background">
+        <div className="lg:hidden mb-10">
           <Link href="/" className="flex items-center gap-2">
-            <img src={logoPath} alt="SkillSwap" className="h-8 w-8" />
-            <span className="font-bold text-xl">SkillSwap</span>
+            <img src={logoPath} alt="SkillSwap" className="h-7 w-7" />
+            <span className="font-bold text-lg">SkillSwap</span>
           </Link>
         </div>
-        
+
         <div className="max-w-md w-full mx-auto">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold mb-2">Create an account</h2>
-            <p className="text-muted-foreground">Join the community and start swapping skills today.</p>
+            <h1 className="text-2xl font-bold mb-1">Welcome to SkillSwap</h1>
+            <p className="text-muted-foreground text-sm">Create your account</p>
           </div>
 
-          <Button variant="outline" type="button" className="w-full h-11 mb-6">
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+          <Button variant="outline" type="button" className="w-full h-11 mb-5 gap-2">
+            <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -43,69 +85,53 @@ export default function Register() {
             Sign up with Google
           </Button>
 
-          <div className="relative mb-6">
+          <div className="relative mb-5">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
+              <div className="w-full border-t border-border" />
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-background px-3 text-muted-foreground">Or sign up with Email</span>
             </div>
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium" htmlFor="name">Full Name</label>
-              <Input id="name" placeholder="John Doe" required />
+              <Input id="name" placeholder="John Doe" autoComplete="name" required />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="email">Email</label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="you@example.com" 
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium" htmlFor="email">Email Address</label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-sm font-medium" htmlFor="password">Password</label>
-              <Input id="password" type="password" placeholder="Create a password" required />
+              <Input id="password" type="password" placeholder="Create a password" autoComplete="new-password" required />
             </div>
 
-            <Button type="submit" className="w-full h-11 text-base mt-6">
-              Create Account
+            <p className="text-xs text-muted-foreground pt-1">
+              By signing up you agree to our{" "}
+              <a href="#" className="underline hover:text-foreground">Terms of Service</a>
+              {" "}and{" "}
+              <a href="#" className="underline hover:text-foreground">Privacy Policy</a>.
+            </p>
+
+            <Button type="submit" className="w-full h-11 text-base mt-2">
+              Sign Up
             </Button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            Already have an account? <Link href="/login" className="text-primary font-medium hover:underline">Log in</Link>
+          <p className="mt-7 text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary font-medium hover:underline">Log in</Link>
           </p>
-        </div>
-      </div>
-
-      {/* Right panel - illustration */}
-      <div className="hidden lg:flex flex-1 flex-col justify-center px-12 bg-secondary text-secondary-foreground relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
-        <div className="relative z-10 max-w-lg ml-auto">
-          <Link href="/" className="inline-block mb-12">
-            <div className="flex items-center gap-2 bg-white/10 w-max px-4 py-2 rounded-full backdrop-blur-sm">
-              <img src={logoPath} alt="SkillSwap" className="h-6 w-6 brightness-0 invert" />
-              <span className="font-bold tracking-tight text-white">SkillSwap</span>
-            </div>
-          </Link>
-          <h1 className="text-5xl font-bold tracking-tight mb-6">Learn anything. Teach anything.</h1>
-          <p className="text-xl text-secondary-foreground/80 mb-8">
-            SkillSwap matches you with peers who want to learn what you know, and can teach you what you want to learn. No money involved.
-          </p>
-          <div className="flex items-center gap-4 text-sm font-medium text-white/90">
-            <div className="flex -space-x-3">
-              <div className="w-10 h-10 rounded-full border-2 border-secondary bg-blue-500"></div>
-              <div className="w-10 h-10 rounded-full border-2 border-secondary bg-emerald-500"></div>
-              <div className="w-10 h-10 rounded-full border-2 border-secondary bg-rose-500"></div>
-            </div>
-            <span>Join 12,000+ active members</span>
-          </div>
         </div>
       </div>
     </div>
