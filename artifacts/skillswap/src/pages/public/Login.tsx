@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import logoPath from "@assets/skillswaplogo_1784374390885.png";
 import { useAuthStore } from "@/store/authStore";
+import { ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -37,14 +38,20 @@ export default function Login() {
 
       {/* Right panel - form */}
       <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 lg:px-24 bg-background">
-        <div className="lg:hidden mb-12">
-          <Link href="/" className="flex items-center gap-2">
-            <img src={logoPath} alt="SkillSwap" className="h-8 w-8" />
-            <span className="font-bold text-xl">SkillSwap</span>
-          </Link>
-        </div>
-        
         <div className="max-w-md w-full mx-auto">
+          {/* Back to home */}
+          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8 group">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Back to home
+          </Link>
+
+          <div className="lg:hidden mb-8">
+            <Link href="/" className="flex items-center gap-2">
+              <img src={logoPath} alt="SkillSwap" className="h-8 w-8" />
+              <span className="font-bold text-xl">SkillSwap</span>
+            </Link>
+          </div>
+
           <div className="mb-8">
             <h2 className="text-3xl font-bold mb-2">Log in</h2>
             <p className="text-muted-foreground">Enter your email to access your account.</p>
