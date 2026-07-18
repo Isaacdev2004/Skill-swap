@@ -287,10 +287,10 @@ export default function Landing() {
             <span className="font-semibold text-muted-foreground text-sm">SkillSwap © 2024</span>
           </div>
           <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Guidelines</a>
-            <a href="#" className="hover:text-foreground transition-colors">Support</a>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="/guidelines" className="hover:text-foreground transition-colors">Guidelines</Link>
+            <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
           </div>
         </div>
       </footer>

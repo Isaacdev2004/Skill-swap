@@ -11,6 +11,10 @@ import Landing from '@/pages/public/Landing';
 import Login from '@/pages/public/Login';
 import Register from '@/pages/public/Register';
 import ForgotPassword from '@/pages/public/ForgotPassword';
+import Terms from '@/pages/public/Terms';
+import Privacy from '@/pages/public/Privacy';
+import Guidelines from '@/pages/public/Guidelines';
+import Support from '@/pages/public/Support';
 
 // App pages
 import Dashboard from '@/pages/app/Dashboard';
@@ -48,6 +52,18 @@ function Router() {
       </Route>
       <Route path="/forgot-password">
         <PublicLayout><ForgotPassword /></PublicLayout>
+      </Route>
+      <Route path="/terms">
+        <PublicLayout><Terms /></PublicLayout>
+      </Route>
+      <Route path="/privacy">
+        <PublicLayout><Privacy /></PublicLayout>
+      </Route>
+      <Route path="/guidelines">
+        <PublicLayout><Guidelines /></PublicLayout>
+      </Route>
+      <Route path="/support">
+        <PublicLayout><Support /></PublicLayout>
       </Route>
 
       {/* App Routes */}
