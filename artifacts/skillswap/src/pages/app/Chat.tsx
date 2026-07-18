@@ -22,7 +22,8 @@ export default function Chat() {
     } else if (conversations.length > 0 && !activeConversationId) {
       setActiveConversation(conversations[0].id);
     }
-  }, [match, params, conversations, activeConversationId, setActiveConversation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match, params?.id, conversations.length]);
 
   // Scroll to bottom on new message
   useEffect(() => {
