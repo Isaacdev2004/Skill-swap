@@ -1,0 +1,31 @@
+# Render Blueprint — SkillSwap API
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: skillswap-api
+    runtime: node
+    rootDir: backend
+    region: frankfurt
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: REDIS_ENABLED
+        value: "false"
+      - key: USE_MEMORY_DB
+        value: "false"

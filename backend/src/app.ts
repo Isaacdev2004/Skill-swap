@@ -5,7 +5,7 @@ import morgan from "morgan";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
-import { env, allowedOrigins } from "@/config/env";
+import { env, allowedOrigins, isProduction } from "@/config/env";
 import { API_PREFIX } from "@/config/constants";
 import { swaggerSpec } from "@/config/swagger";
 import { globalRateLimiter } from "@/middlewares/rateLimit.middleware";
@@ -26,11 +26,19 @@ export function createApp(): Express {
   app.use(
     cors({
       origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin) {
           callback(null, true);
           return;
         }
-        callback(null, env.NODE_ENV !== "production");
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+        if (isProduction) {
+          callback(null, false);
+          return;
+        }
+        callback(null, true);
       },
       credentials: true,
     })
