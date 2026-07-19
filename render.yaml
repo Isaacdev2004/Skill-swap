@@ -4,9 +4,10 @@ services:
   - type: web
     name: skillswap-api
     runtime: node
-    rootDir: backend
     region: frankfurt
     plan: free
+    # Build only the MongoDB backend — NOT the pnpm monorepo root
+    rootDir: backend
     buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /api/v1/health

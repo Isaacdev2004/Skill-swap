@@ -28,12 +28,17 @@
 
 ### Option B: Manual Web Service
 
+**Important:** If build logs show `pnpm run build` from the repo root, your Root Directory is wrong. Render must build the `backend` folder only.
+
 | Setting | Value |
 |---------|-------|
 | Root Directory | `backend` |
+| Runtime | Node |
 | Build Command | `npm install && npm run build` |
 | Start Command | `npm start` |
 | Health Check Path | `/api/v1/health` |
+
+Do **not** use the default monorepo build (`pnpm install && pnpm run build` at repo root).
 
 **Required env vars:**
 
