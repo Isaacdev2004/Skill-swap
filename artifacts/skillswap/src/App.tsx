@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -5,6 +6,7 @@ import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PublicLayout } from '@/components/layout/PublicLayout';
+import { useAuthStore } from '@/store/authStore';
 
 // Public pages
 import Landing from '@/pages/public/Landing';
@@ -93,6 +95,12 @@ function Router() {
 }
 
 function App() {
+  const fetchMe = useAuthStore((state) => state.fetchMe);
+
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

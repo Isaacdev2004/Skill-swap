@@ -34,13 +34,13 @@ const NavLink = ({ href, icon: Icon, children, exact = false, onClick }: any) =>
 }
 
 export function Sidebar() {
-  const { currentUser, logout } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const { unreadCount } = useNotificationsStore()
   const { theme, toggleTheme } = useThemeStore()
   const [, setLocation] = useLocation()
   const [mobileOpen, setMobileOpen] = React.useState(false)
 
-  if (!currentUser) return null
+  if (!user) return null
 
   const handleLogout = () => {
     logout()
@@ -86,7 +86,7 @@ export function Sidebar() {
           
           <NavLink href="/settings" icon={Settings} onClick={closeMobile}>Settings</NavLink>
           
-          {currentUser.isAdmin && (
+          {user.isAdmin && (
             <>
               <div className="px-2 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Admin</div>
               <NavLink href="/admin" icon={ShieldAlert} onClick={closeMobile}>Overview</NavLink>
@@ -104,12 +104,12 @@ export function Sidebar() {
         </div>
         
         <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-          <Avatar className={cn("h-10 w-10", currentUser.avatarColor)}>
-            <AvatarFallback className="text-white bg-transparent">{currentUser.initials}</AvatarFallback>
+          <Avatar className={cn("h-10 w-10", user.avatarColor)}>
+            <AvatarFallback className="text-white bg-transparent">{user.initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col flex-1 overflow-hidden">
-            <span className="text-sm font-medium truncate">{currentUser.name}</span>
-            <span className="text-xs text-muted-foreground truncate">{currentUser.email}</span>
+            <span className="text-sm font-medium truncate">{user.name}</span>
+            <span className="text-xs text-muted-foreground truncate">{user.email}</span>
           </div>
           <Button variant="ghost" size="icon" onClick={handleLogout} title="Log out">
             <LogOut className="h-4 w-4 text-muted-foreground hover:text-destructive" />

@@ -8,15 +8,15 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
-  const { currentUser } = useAuthStore();
+  const { user } = useAuthStore();
   
-  if (!currentUser) return null;
+  if (!user) return null;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {currentUser.name.split(' ')[0]}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user.name.split(' ')[0]}</h1>
           <p className="text-muted-foreground mt-1">Here's what's happening with your skill swaps today.</p>
         </div>
         <div className="flex gap-2">
@@ -66,8 +66,8 @@ export default function Dashboard() {
             <UserCheck className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{currentUser.rating.toFixed(1)}</div>
-            <p className="text-xs text-muted-foreground mt-1">From {currentUser.reviewCount} reviews</p>
+            <div className="text-2xl font-bold">{user.rating.toFixed(1)}</div>
+            <p className="text-xs text-muted-foreground mt-1">From {user.reviewCount} reviews</p>
           </CardContent>
         </Card>
       </div>

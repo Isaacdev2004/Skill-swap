@@ -5,8 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthStore } from "@/store/authStore";
 
 export default function Settings() {
-  const { currentUser } = useAuthStore();
-  if (!currentUser) return null;
+  const { user } = useAuthStore();
+  if (!user) return null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
@@ -33,18 +33,18 @@ export default function Settings() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Full Name</label>
-                  <Input defaultValue={currentUser.name} />
+                  <Input defaultValue={user.name} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Email</label>
-                  <Input defaultValue={currentUser.email} type="email" />
+                  <Input defaultValue={user.email} type="email" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Bio</label>
                 <textarea 
                   className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  defaultValue={currentUser.bio}
+                  defaultValue={user.bio}
                 />
               </div>
               <Button>Save Changes</Button>
