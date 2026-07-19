@@ -49,4 +49,28 @@ export const isProduction = env.NODE_ENV === "production";
 export const isDevelopment = env.NODE_ENV === "development";
 export const isTest = env.NODE_ENV === "test";
 
-export const allowedOrigins = env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim());
+export const allowedOrigins = Array.from(
+  new Set([
+    ...env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean),
+    env.FRONTEND_URL.trim(),
+  ])
+);
+
+function isOriginAllowed(origin: string): boolean {
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  // Allow Vercel preview/production URLs when frontend is hosted on Vercel
+  if (
+    isProduction &&
+    env.FRONTEND_URL.includes("vercel.app") &&
+    /^https:\/\/[\w-]+\.vercel\.app$/i.test(origin)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+export { isOriginAllowed };
