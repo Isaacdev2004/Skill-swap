@@ -1,13 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_SESSIONS } from "@/mock/data";
 import { Calendar as CalendarIcon, Clock, Video, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { api } from "@/lib/api";
+import type { Session } from "@/mock/data";
 
 export default function Scheduler() {
-  const [currentMonth, setCurrentMonth] = useState(new Date(2024, 10)); // Nov 2024
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [sessions, setSessions] = useState<Session[]>([]);
+
+  useEffect(() => {
+    api.sessions
+      .list("upcoming")
+      .then((data) => setSessions(data.sessions))
+      .catch(() => setSessions([]));
+  }, []);
   
   // Basic mock calendar grid generation
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
@@ -85,7 +94,7 @@ export default function Scheduler() {
           <h3 className="font-semibold text-lg border-b pb-2">Upcoming</h3>
           
           <div className="space-y-4">
-            {MOCK_SESSIONS.filter(s => s.status === 'upcoming').map(session => (
+            {sessions.filter(s => s.status === 'upcoming').map(session => (
               <Card key={session.id} className="border-l-4 border-l-primary">
                 <CardContent className="p-5">
                   <div className="flex justify-between items-start mb-3">

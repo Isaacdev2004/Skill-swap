@@ -22,9 +22,22 @@ interface ApiEnvelope<T = unknown> {
   statusCode?: number;
 }
 
-function mapUser(raw: Record<string, unknown>) {
-  const avatarId = String(raw.avatarId ?? "indigo:U");
-  const [avatarColor = "indigo", initials = "U"] = avatarId.split(":");
+export function getAccessToken() {
+  return accessToken;
+}
+
+export function getSocketUrl() {
+  return BASE.replace(/\/api\/v\d+\/?$/, "");
+}
+
+function parseAvatar(avatarId?: string) {
+  const value = String(avatarId ?? "indigo:U");
+  const [color = "indigo", initials = "U"] = value.split(":");
+  return { initials, avatarColor: `bg-${color}-500` };
+}
+
+export function mapUser(raw: Record<string, unknown>) {
+  const { initials, avatarColor } = parseAvatar(String(raw.avatarId ?? ""));
 
   return {
     id: String(raw.id ?? raw._id ?? ""),
@@ -42,8 +55,134 @@ function mapUser(raw: Record<string, unknown>) {
     reviewCount: Number(raw.reviewCount ?? 0),
     verified: Boolean(raw.verified),
     isAdmin: ["admin", "super_admin", "moderator"].includes(String(raw.role ?? "")),
+    role: String(raw.role ?? "user"),
+    status: String(raw.status ?? "active"),
     joinedAt: String(raw.createdAt ?? raw.joinedAt ?? new Date().toISOString()),
   };
+}
+
+export function mapMatch(raw: Record<string, unknown>) {
+  const { initials, avatarColor } = parseAvatar(String(raw.avatarId ?? ""));
+  const mutual = (raw.mutualSkills ?? {}) as {
+    youTeachTheyLearn?: string[];
+    theyTeachYouLearn?: string[];
+  };
+
+  return {
+    id: String(raw.userId ?? raw.id ?? ""),
+    compatibilityScore: Number(raw.matchPercentage ?? 0),
+    user: {
+      id: String(raw.userId ?? ""),
+      name: String(raw.name ?? ""),
+      email: "",
+      initials,
+      avatarColor,
+      bio: "",
+      rating: Number(raw.rating ?? 0),
+      reviewCount: Number(raw.reviewCount ?? 0),
+      verified: Boolean(raw.verified),
+      isAdmin: false,
+      languages: [],
+      availability: { days: [], timeSlot: "" },
+      skillsTeach: [],
+      skillsLearn: [],
+      badges: [],
+      joinedAt: new Date().toISOString(),
+    },
+    theyWant: (mutual.youTeachTheyLearn ?? []).map((name, i) => ({
+      id: `want-${i}`,
+      name,
+      category: "Technology" as const,
+      level: "Intermediate" as const,
+    })),
+    theyTeach: (mutual.theyTeachYouLearn ?? []).map((name, i) => ({
+      id: `teach-${i}`,
+      name,
+      category: "Technology" as const,
+      level: "Intermediate" as const,
+    })),
+    mutualSkills: [
+      ...(mutual.youTeachTheyLearn ?? []),
+      ...(mutual.theyTeachYouLearn ?? []),
+    ],
+    status: "pending" as const,
+  };
+}
+
+export function mapSession(raw: Record<string, unknown>, currentUserId?: string) {
+  const host = raw.host as Record<string, unknown> | undefined;
+  const participant = raw.participant as Record<string, unknown> | undefined;
+  const withUserRaw =
+    String(host?._id ?? host?.id) === currentUserId ? participant : host;
+  const withUser = mapUser((withUserRaw ?? {}) as Record<string, unknown>);
+  const scheduledAt = String(raw.scheduledAt ?? new Date().toISOString());
+
+  return {
+    id: String(raw._id ?? raw.id ?? ""),
+    withUser,
+    skill: {
+      id: "session-skill",
+      name: String(raw.title ?? "Skill session"),
+      category: "Technology" as const,
+      level: "Intermediate" as const,
+    },
+    date: scheduledAt,
+    time: new Date(scheduledAt).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    duration: Number(raw.durationMinutes ?? 60),
+    status: String(raw.status ?? "upcoming") as "upcoming" | "completed" | "cancelled",
+  };
+}
+
+export function mapNotification(raw: Record<string, unknown>) {
+  const typeMap: Record<string, string> = {
+    new_match: "match",
+    new_message: "message",
+    session_reminder: "session",
+    review_received: "review",
+    swap_accepted: "request",
+    swap_rejected: "request",
+    admin: "request",
+  };
+
+  return {
+    id: String(raw._id ?? raw.id ?? ""),
+    type: typeMap[String(raw.type ?? "")] ?? "request",
+    title: String(raw.title ?? ""),
+    body: String(raw.message ?? ""),
+    isRead: Boolean(raw.read),
+    createdAt: String(raw.createdAt ?? new Date().toISOString()),
+  };
+}
+
+export function mapMarketplaceTeacher(items: Record<string, unknown>[]) {
+  const grouped = new Map<string, ReturnType<typeof mapUser> & { skillsTeach: any[] }>();
+
+  for (const item of items) {
+    const teacher = item.teacher as Record<string, unknown>;
+    const skill = item.skill as Record<string, unknown>;
+    const teacherId = String(teacher?.id ?? teacher?._id ?? "");
+    if (!teacherId) continue;
+
+    if (!grouped.has(teacherId)) {
+      grouped.set(teacherId, {
+        ...mapUser(teacher),
+        skillsTeach: [],
+        skillsLearn: [],
+      });
+    }
+
+    grouped.get(teacherId)!.skillsTeach.push({
+      id: String(skill?.id ?? skill?._id ?? ""),
+      name: String(skill?.name ?? ""),
+      category: "Technology",
+      level: String(item.level ?? "Intermediate"),
+    });
+  }
+
+  return Array.from(grouped.values());
 }
 
 function saveAccessToken(token: string | null) {
@@ -97,11 +236,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 const get = <T>(path: string) => request<T>(path);
 const post = <T>(path: string, body?: unknown) =>
   request<T>(path, { method: "POST", body: JSON.stringify(body) });
-const put = <T>(path: string, body?: unknown) =>
-  request<T>(path, { method: "PUT", body: JSON.stringify(body) });
 const patch = <T>(path: string, body?: unknown) =>
   request<T>(path, { method: "PATCH", body: JSON.stringify(body) });
-const del = <T>(path: string) => request<T>(path, { method: "DELETE" });
 
 export const api = {
   auth: {
@@ -137,62 +273,75 @@ export const api = {
     list: (search?: string) =>
       get<{ items: unknown[] }>(
         `/users${search ? `?search=${encodeURIComponent(search)}` : ""}`
-      ).then((d) => ({ users: (d.items ?? []).map((u) => mapUser(u as Record<string, unknown>)) })),
-    me: () => api.auth.me(),
+      ).then((d) => ({
+        users: (d.items ?? []).map((u) => mapUser(u as Record<string, unknown>)),
+      })),
     get: (id: string) =>
       get<{ user: Record<string, unknown> }>(`/users/${id}`).then((d) => ({
         user: mapUser(d.user),
       })),
-    update: (body: Record<string, unknown>) =>
-      patch<{ user: Record<string, unknown> }>(`/users/${body.id ?? "me"}`, body).then(
-        (d) => ({ user: mapUser(d.user) })
+    skills: (id: string) =>
+      get<{ skills: Record<string, unknown>[] }>(`/users/${id}/skills`).then(
+        (d) => d.skills ?? []
       ),
   },
+  marketplace: {
+    browse: (search?: string) =>
+      get<{ items: Record<string, unknown>[] }>(
+        `/marketplace/browse${search ? `?search=${encodeURIComponent(search)}` : ""}`
+      ).then((d) => ({ teachers: mapMarketplaceTeacher(d.items ?? []) })),
+  },
   matches: {
-    list: () => get<{ matches: unknown[] }>("/matches"),
+    list: () =>
+      get<{ matches: Record<string, unknown>[] }>("/matches").then((d) => ({
+        matches: (d.matches ?? []).map((m) => mapMatch(m)),
+      })),
   },
   swapRequests: {
-    list: () =>
-      get<{ items: unknown[] }>("/swap-requests").then((d) => ({
-        requests: d.items ?? [],
-      })),
+    list: (status?: string) =>
+      get<{ items: unknown[] }>(
+        `/swap-requests${status ? `?status=${status}` : ""}`
+      ).then((d) => ({ requests: d.items ?? [] })),
     create: (body: unknown) => post<{ swapRequest: unknown }>("/swap-requests", body),
-    update: (id: string, body: unknown) =>
-      patch<{ swapRequest: unknown }>(`/swap-requests/${id}`, body),
   },
   sessions: {
     list: (status?: string) =>
-      get<{ items: unknown[] }>(
+      get<{ items: Record<string, unknown>[] }>(
         `/sessions${status ? `?status=${status}` : ""}`
-      ).then((d) => ({ sessions: d.items ?? [] })),
-    create: (body: unknown) => post<{ session: unknown }>("/sessions", body),
-    update: (id: string, body: unknown) =>
-      patch<{ session: unknown }>(`/sessions/${id}`, body),
-    cancel: (id: string) => patch(`/sessions/${id}/cancel`),
+      ).then(async (d) => {
+        const me = await api.auth.me().catch(() => null);
+        return {
+          sessions: (d.items ?? []).map((s) =>
+            mapSession(s, me?.user.id)
+          ),
+        };
+      }),
   },
   conversations: {
-    list: () =>
-      get<{ conversations: unknown[] }>("/chat/conversations"),
+    list: () => get<{ conversations: Record<string, unknown>[] }>("/chat/conversations"),
     getOrCreate: (participantId: string) =>
       post<{ conversation: { _id: string } }>("/chat/conversations", {
         participantId,
-      }).then((d) => ({ conversationId: d.conversation._id })),
+      }).then((d) => ({ conversationId: String(d.conversation._id) })),
     messages: (id: string) =>
-      get<{ items: unknown[] }>(`/chat/conversations/${id}/messages`).then((d) => ({
-        messages: d.items ?? [],
-      })),
+      get<{ items: Record<string, unknown>[] }>(
+        `/chat/conversations/${id}/messages`
+      ).then((d) => ({ messages: d.items ?? [] })),
     send: (id: string, text: string) =>
-      post<{ message: unknown }>(`/chat/conversations/${id}/messages`, {
-        content: text,
-      }),
+      post<{ message: Record<string, unknown> }>(
+        `/chat/conversations/${id}/messages`,
+        { content: text }
+      ),
+    markRead: (id: string) => patch(`/chat/conversations/${id}/read`),
   },
   notifications: {
     list: () =>
-      get<{ items: unknown[]; meta?: { unreadCount?: number } }>("/notifications").then(
-        (d) => ({
-          notifications: d.items ?? [],
-          unreadCount: d.meta?.unreadCount ?? 0,
-        })
+      get<{ items: Record<string, unknown>[] }>("/notifications").then((d) => ({
+        notifications: (d.items ?? []).map((n) => mapNotification(n)),
+      })),
+    unreadCount: () =>
+      get<{ unreadCount: number }>("/notifications/unread-count").then(
+        (d) => d.unreadCount ?? 0
       ),
     markRead: (id: string) => patch(`/notifications/${id}/read`),
     markAll: () => patch("/notifications/read-all"),
@@ -205,14 +354,31 @@ export const api = {
     create: (body: unknown) => post<{ review: unknown }>("/reviews", body),
   },
   admin: {
-    stats: () => get<{ stats: unknown }>("/admin/dashboard").then((d) => d.stats),
+    stats: () =>
+      get<{
+        stats: {
+          users: number;
+          skills: number;
+          sessions: number;
+          swapRequests: number;
+          reviews: number;
+          openReports: number;
+        };
+      }>("/admin/dashboard").then((d) => d.stats),
     users: (search?: string) =>
-      get<{ items: unknown[] }>(
+      get<{ items: Record<string, unknown>[] }>(
         `/admin/users${search ? `?search=${encodeURIComponent(search)}` : ""}`
-      ).then((d) => ({ users: d.items ?? [] })),
-    updateUser: (id: string, body: unknown) => patch(`/admin/users/${id}`, body),
+      ).then((d) => ({
+        users: (d.items ?? []).map((u) => mapUser(u)),
+      })),
+    updateUserStatus: (id: string, status: string) =>
+      patch(`/admin/users/${id}/status`, { status }),
+    updateUserRole: (id: string, role: string) =>
+      patch(`/admin/users/${id}/role`, { role }),
     reports: () =>
-      get<{ items: unknown[] }>("/admin/reports").then((d) => ({ reports: d.items ?? [] })),
+      get<{ items: unknown[] }>("/admin/reports").then((d) => ({
+        reports: d.items ?? [],
+      })),
     resolveReport: (id: string, resolution: string) =>
       patch(`/admin/reports/${id}/resolve`, { resolution }),
   },

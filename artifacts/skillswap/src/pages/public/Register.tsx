@@ -21,7 +21,7 @@ export default function Register() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     setLoading(true);
     try {
       const { user } = await api.auth.register({ name: name.trim(), email: email.trim(), password });
@@ -111,7 +111,7 @@ export default function Register() {
             <div className="space-y-1.5">
               <label className="text-sm font-medium" htmlFor="password">Password</label>
               <div className="relative">
-                <Input id="password" type={showPw ? "text" : "password"} placeholder="Min. 6 characters" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
+                <Input id="password" type={showPw ? "text" : "password"} placeholder="Min. 8 characters" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required className="pr-10" />
                 <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>

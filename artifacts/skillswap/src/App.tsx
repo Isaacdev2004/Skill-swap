@@ -7,6 +7,8 @@ import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { useAuthStore } from '@/store/authStore';
+import { useChatStore } from '@/store/chatStore';
+import { useNotificationsStore } from '@/store/notificationsStore';
 
 // Public pages
 import Landing from '@/pages/public/Landing';
@@ -96,10 +98,27 @@ function Router() {
 
 function App() {
   const fetchMe = useAuthStore((state) => state.fetchMe);
+  const user = useAuthStore((state) => state.user);
+  const connectChat = useChatStore((state) => state.connect);
+  const disconnectChat = useChatStore((state) => state.disconnect);
+  const fetchNotifications = useNotificationsStore((state) => state.fetchNotifications);
 
   useEffect(() => {
     fetchMe();
   }, [fetchMe]);
+
+  useEffect(() => {
+    if (user) {
+      connectChat(user.id);
+      void fetchNotifications();
+    } else {
+      disconnectChat();
+    }
+
+    return () => {
+      disconnectChat();
+    };
+  }, [user, connectChat, disconnectChat, fetchNotifications]);
 
   return (
     <QueryClientProvider client={queryClient}>

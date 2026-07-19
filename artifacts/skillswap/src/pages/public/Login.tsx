@@ -119,8 +119,9 @@ export default function Login() {
           </p>
 
           <div className="mt-6 p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground">
-            <strong>Demo accounts</strong> (password: <code>password123</code>)<br />
-            arjun@example.com · sarah@example.com · emily@example.com (admin)
+            <strong>Demo accounts</strong><br />
+            Admin: <code>admin@skillswap.app</code> / <code>Admin123!@#</code><br />
+            User: <code>alex.smith0@skillswap.test</code> / <code>Password123!</code>
           </div>
         </div>
       </div>

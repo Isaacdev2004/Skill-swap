@@ -1,7 +1,7 @@
 import type { Server as HttpServer } from "http";
 import { Server, type Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import { env, allowedOrigins } from "@/config/env";
+import { env, isOriginAllowed } from "@/config/env";
 import { TOKEN_TYPES } from "@/config/constants";
 import type { JwtPayload } from "@/common/types";
 import { logger } from "@/common/utils/logger";
@@ -17,7 +17,13 @@ const onlineUsers = new Map<string, string>();
 export function initializeSocket(httpServer: HttpServer): Server {
   const io = new Server(httpServer, {
     cors: {
-      origin: allowedOrigins,
+      origin: (origin, callback) => {
+        if (!origin || isOriginAllowed(origin)) {
+          callback(null, true);
+          return;
+        }
+        callback(null, false);
+      },
       credentials: true,
     },
   });
