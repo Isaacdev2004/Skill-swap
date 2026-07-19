@@ -6,7 +6,7 @@ services:
     region: frankfurt
     plan: free
     rootDir: backend
-    buildCommand: npm install && npm run build
+    buildCommand: NPM_CONFIG_PRODUCTION=false npm install --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/v1/health
     envVars:
