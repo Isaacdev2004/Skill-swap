@@ -8,6 +8,7 @@ services:
     rootDir: backend
     buildCommand: NPM_CONFIG_PRODUCTION=false npm install --include=dev && npm run build
     startCommand: npm start
+    # Do NOT use the build command as startCommand — start must be: npm start
     healthCheckPath: /api/v1/health
     envVars:
       - key: NODE_ENV
